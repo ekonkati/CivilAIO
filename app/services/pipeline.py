@@ -4,14 +4,18 @@ import math
 from typing import Dict, List, Tuple
 
 from app.models.project import (
+    ComplianceCheck,
     EstimateLine,
     EstimateSummary,
     ExecutionTask,
+    ExportArtifact,
     LayoutPlan,
     Project,
     ProjectRequest,
+    RiskItem,
     RoomSpec,
     StructuralSkeleton,
+    DrawingSheet,
 )
 
 
@@ -161,10 +165,121 @@ def execution_plan(project: Project) -> List[ExecutionTask]:
     return [ExecutionTask(name=name, duration_days=days, dependencies=deps) for name, days, deps in sequence]
 
 
+def generate_drawings(project: Project) -> List[DrawingSheet]:
+    base_url = "https://example.com/mock"
+    sheets = [
+        DrawingSheet(
+            name="Architectural floor plan",
+            discipline="architecture",
+            format="pdf",
+            download_url=f"{base_url}/{project.id}/arch_plan.pdf",
+            notes="AI-seeded layout with circulation and parking",
+        ),
+        DrawingSheet(
+            name="Structural GA",
+            discipline="structure",
+            format="pdf",
+            download_url=f"{base_url}/{project.id}/structural_ga.pdf",
+            notes="Column grid, beams, slab type per skeleton",
+        ),
+        DrawingSheet(
+            name="Rebar schedule",
+            discipline="structure",
+            format="csv",
+            download_url=f"{base_url}/{project.id}/rebar_schedule.csv",
+            notes="Deterministic bar marks for illustration",
+        ),
+        DrawingSheet(
+            name="Execution Gantt",
+            discipline="execution",
+            format="pdf",
+            download_url=f"{base_url}/{project.id}/gantt.pdf",
+            notes="Derived from execution tasks",
+        ),
+    ]
+    return sheets
+
+
+def compliance_checks(project: Project) -> List[ComplianceCheck]:
+    preferred = project.preferred_codes or ["IS 456", "IS 875"]
+    checks: List[ComplianceCheck] = []
+    for code in preferred:
+        checks.append(
+            ComplianceCheck(
+                code=code,
+                clause="Serviceability",
+                status="pass",
+                message="Drift within limits using conservative defaults",
+                recommendation="Validate with solver export once loads are finalized",
+            )
+        )
+    checks.append(
+        ComplianceCheck(
+            code="NBC Fire",
+            clause="Means of egress",
+            status="warning",
+            message="Stair width assumed 1.2m; confirm occupancy and travel distance",
+            recommendation="Regenerate layout with fire egress template if high occupancy",
+        )
+    )
+    return checks
+
+
+def export_artifacts(project: Project) -> List[ExportArtifact]:
+    base_url = "https://example.com/mock/export"
+    return [
+        ExportArtifact(
+            format="ifc",
+            schema="IFC4",
+            download_url=f"{base_url}/{project.id}/model.ifc",
+            notes="Aggregated layout and skeleton geometry",
+        ),
+        ExportArtifact(
+            format="rvt",
+            schema="Revit 2024",
+            download_url=f"{base_url}/{project.id}/model.rvt",
+            notes="Placeholder link for BIM handoff",
+        ),
+        ExportArtifact(
+            format="kratos-json",
+            schema="Kratos structural",
+            download_url=f"{base_url}/{project.id}/kratos.json",
+            notes="Ready for solver container once connectivity is enabled",
+        ),
+    ]
+
+
+def risk_register(project: Project) -> List[RiskItem]:
+    return [
+        RiskItem(
+            name="Geotechnical uncertainty",
+            severity="medium",
+            impact="cost",
+            mitigation="Request soil report; switch to raft footing if soft soil",
+        ),
+        RiskItem(
+            name="Supply chain",
+            severity="medium",
+            impact="schedule",
+            mitigation="Lock rates and buffers in BOQ; prefer local vendors",
+        ),
+        RiskItem(
+            name="Regulatory approvals",
+            severity="low",
+            impact="schedule",
+            mitigation="Provide drawings in mandated formats; track approval tasks",
+        ),
+    ]
+
+
 def seed_project(request: ProjectRequest) -> Project:
     project = Project(**request.dict())
     project.layout = propose_layout(request)
     project.skeleton = derive_structure(project)
     project.estimate = estimate_cost(project)
     project.execution_plan = execution_plan(project)
+    project.drawings = generate_drawings(project)
+    project.compliance = compliance_checks(project)
+    project.exports = export_artifacts(project)
+    project.risks = risk_register(project)
     return project

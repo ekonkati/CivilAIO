@@ -42,6 +42,10 @@ def test_full_pipeline_generates_artifacts():
     estimate_project = estimate_resp.json()
     assert estimate_project["estimate"]["total"] > 0
     assert estimate_project["execution_plan"]
+    assert estimate_project["drawings"]
+    assert estimate_project["compliance"]
+    assert estimate_project["exports"]
+    assert estimate_project["risks"]
 
 
 def test_missing_project_returns_404():

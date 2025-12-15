@@ -53,7 +53,7 @@ This revision elaborates the delivery strategy so stakeholders can see the full 
 3. Governance: audit logs for every transformation, clause references, override tracking, reproducible seeds for AI outputs, and PII/data residency controls.
 
 ## 10) Delivery Milestones (Engineering-Ready)
-- **M1: Reconciliation & Scaffolding** — finalize PRD baseline; create FastAPI/Next.js/worker skeletons; Docker Compose; CI (lint/test/type-check); .env templates. _(Status: FastAPI scaffold extended with project seeding, layout/structure/estimation heuristics, and execution milestones; awaiting `myprd.txt` to complete reconciliation.)_
+- **M1: Reconciliation & Scaffolding** — finalize PRD baseline; create FastAPI/Next.js/worker skeletons; Docker Compose; CI (lint/test/type-check); .env templates. _(Status: FastAPI scaffold now seeds the end-to-end mocked pipeline: layout, structure, estimation, execution, drawings, compliance, exports, and risks; awaiting `myprd.txt` to complete reconciliation.)_
 - **M2: Requirement & Layout MVP** — chat/forms intake, file uploads, vectorization spike, layout generator with revisions, template ingestion, persistence.
 - **M3: Structural MVP** — auto-framing, load engine, Kratos Docker integration, RCC/steel checks (core clauses), caching, basic report stubs.
 - **M4: Drawings** — plan/detail generation, export pipeline, provenance hashing, review/markup UI.

@@ -37,6 +37,44 @@ class StructuralSkeleton(BaseModel):
     notes: List[str] = Field(default_factory=list)
 
 
+class DrawingSheet(BaseModel):
+    """Represents a drawing or export-ready document."""
+
+    name: str
+    discipline: str = Field(..., description="architecture/structure/services/execution")
+    format: str = Field(..., description="pdf/dwg/ifc/revit")
+    download_url: str
+    notes: Optional[str] = None
+
+
+class ComplianceCheck(BaseModel):
+    """Simple compliance or code check result."""
+
+    code: str
+    clause: Optional[str] = None
+    status: str = Field(..., description="pass/warning/fail")
+    message: str
+    recommendation: Optional[str] = None
+
+
+class ExportArtifact(BaseModel):
+    """Interoperability payload for BIM/CAD downstream tools."""
+
+    format: str
+    schema: str
+    download_url: str
+    notes: Optional[str] = None
+
+
+class RiskItem(BaseModel):
+    """Project risk register item."""
+
+    name: str
+    severity: str
+    impact: str
+    mitigation: str
+
+
 class EstimateLine(BaseModel):
     """Single BOQ/estimation line item."""
 
@@ -105,6 +143,10 @@ class Project(BaseModel):
     skeleton: Optional[StructuralSkeleton] = None
     estimate: Optional[EstimateSummary] = None
     execution_plan: List[ExecutionTask] = Field(default_factory=list)
+    drawings: List[DrawingSheet] = Field(default_factory=list)
+    compliance: List[ComplianceCheck] = Field(default_factory=list)
+    exports: List[ExportArtifact] = Field(default_factory=list)
+    risks: List[RiskItem] = Field(default_factory=list)
 
     @validator("preferred_codes", "structure_types", pre=True)
     def dedupe_values(cls, value: List[str]) -> List[str]:

@@ -4,8 +4,23 @@ from fastapi import APIRouter, HTTPException
 
 from app.config import get_settings
 from app.models.core import HealthStatus, ModuleDescriptor, RequirementBrief
-from app.models.project import LayoutPlan, Project, ProjectRequest, StructuralSkeleton
-from app.services.pipeline import derive_structure, estimate_cost, execution_plan, propose_layout, seed_project
+from app.models.project import (
+    LayoutPlan,
+    Project,
+    ProjectRequest,
+    StructuralSkeleton,
+)
+from app.services.pipeline import (
+    compliance_checks,
+    derive_structure,
+    estimate_cost,
+    execution_plan,
+    export_artifacts,
+    generate_drawings,
+    propose_layout,
+    risk_register,
+    seed_project,
+)
 
 router = APIRouter()
 
@@ -128,5 +143,61 @@ async def generate_estimate(project_id: str) -> Project:
     project = await get_project(project_id)
     project.estimate = estimate_cost(project)
     project.execution_plan = execution_plan(project)
+    project.drawings = generate_drawings(project)
+    project.compliance = compliance_checks(project)
+    project.exports = export_artifacts(project)
+    project.risks = risk_register(project)
+    PROJECTS[project.id] = project
+    return project
+
+
+@router.post(
+    "/projects/{project_id}/drawings",
+    response_model=Project,
+    tags=["projects"],
+    status_code=201,
+)
+async def regenerate_drawings(project_id: str) -> Project:
+    project = await get_project(project_id)
+    project.drawings = generate_drawings(project)
+    PROJECTS[project.id] = project
+    return project
+
+
+@router.post(
+    "/projects/{project_id}/compliance",
+    response_model=Project,
+    tags=["projects"],
+    status_code=201,
+)
+async def recompute_compliance(project_id: str) -> Project:
+    project = await get_project(project_id)
+    project.compliance = compliance_checks(project)
+    PROJECTS[project.id] = project
+    return project
+
+
+@router.post(
+    "/projects/{project_id}/exports",
+    response_model=Project,
+    tags=["projects"],
+    status_code=201,
+)
+async def regenerate_exports(project_id: str) -> Project:
+    project = await get_project(project_id)
+    project.exports = export_artifacts(project)
+    PROJECTS[project.id] = project
+    return project
+
+
+@router.post(
+    "/projects/{project_id}/risks",
+    response_model=Project,
+    tags=["projects"],
+    status_code=201,
+)
+async def refresh_risks(project_id: str) -> Project:
+    project = await get_project(project_id)
+    project.risks = risk_register(project)
     PROJECTS[project.id] = project
     return project

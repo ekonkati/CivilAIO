@@ -15,14 +15,18 @@ This repository tracks the AI-native building design, estimation, and execution 
 - `Makefile`: helper commands for install, lint, test, and run.
 
 ## Backend scaffold
-The scaffold aligns with Phase M1 of the implementation plan and now walks through the PRD journey from requirement capture to costing:
+The scaffold aligns with Phase M1 of the implementation plan and now walks through the PRD journey from requirement capture to costing, drawings, compliance, and exports:
 - `GET /api/health`: reports service status, environment, version, and declared modules mapped to PRD capabilities.
 - `POST /api/briefs`: echoes a high-level project requirement (title, location, preferred codes, structure types, description).
-- `POST /api/projects`: seeds a project from a requirement brief and auto-generates a layout, structural skeleton, estimation, and execution milestones using deterministic heuristics.
-- `GET /api/projects/{id}`: retrieves the unified record (requirement → layout → structure → costing → execution).
+- `POST /api/projects`: seeds a project from a requirement brief and auto-generates a layout, structural skeleton, estimation, execution milestones, drawings, compliance, exports, and risks using deterministic heuristics with mock data.
+- `GET /api/projects/{id}`: retrieves the unified record (requirement → layout → structure → costing → execution → drawings → compliance → exports → risks).
 - `POST /api/projects/{id}/layout`: regenerates the layout proposal from the stored requirement.
 - `POST /api/projects/{id}/structure`: regenerates the structural understanding (columns, beams, slab/foundation, seismic/wind tags).
-- `POST /api/projects/{id}/estimate`: refreshes SSR/SOR-based costing and execution plan.
+- `POST /api/projects/{id}/estimate`: refreshes SSR/SOR-based costing and execution plan while also regenerating drawings, compliance, exports, and risks.
+- `POST /api/projects/{id}/drawings`: regenerates drawing/document placeholders.
+- `POST /api/projects/{id}/compliance`: recomputes code checks against the preferred code list.
+- `POST /api/projects/{id}/exports`: refreshes mock interoperability payloads for IFC/Revit/Kratos.
+- `POST /api/projects/{id}/risks`: refreshes the risk register with mitigations.
 
 ### Quickstart
 ```bash
@@ -32,11 +36,20 @@ make test                 # run pytest suite
 make run                  # start FastAPI on http://localhost:8000
 ```
 
-For a full happy-path demo:
+For a full happy-path demo (after `pip install -r requirements.txt` succeeds in your network):
 ```bash
 curl -s -X POST http://localhost:8000/api/projects \
   -H "Content-Type: application/json" \
   -d '{"title":"G+2 in Hyderabad","location":"Hyderabad","usage":"residential","floors":3,"footprint_m2":120,"preferred_codes":["IS 456"],"structure_types":["RCC"],"regional_rate":"telangana-2024"}'
+
+# then explore follow-on steps
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/layout
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/structure
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/estimate
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/drawings
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/compliance
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/exports
+curl -s -X POST http://localhost:8000/api/projects/<PROJECT_ID>/risks
 ```
 Then open `http://localhost:8000/docs` to rerun layout/structure/estimate actions.
 
