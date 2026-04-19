@@ -36,6 +36,11 @@ make test                 # run pytest suite
 make run                  # start FastAPI on http://localhost:8000
 ```
 
+Offline/sandbox note: lightweight `fastapi` and `pydantic` shims live in the
+repo to keep the mocked pipeline and tests runnable even when external `pip`
+installs are blocked. In a fully networked environment, prefer installing the
+real dependencies from `requirements.txt` for feature parity.
+
 For a full happy-path demo (after `pip install -r requirements.txt` succeeds in your network):
 ```bash
 curl -s -X POST http://localhost:8000/api/projects \
